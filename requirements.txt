@@ -1,3 +1,5 @@
 flask
 pandas
 xgboost
+numpy
+scikit-learn
