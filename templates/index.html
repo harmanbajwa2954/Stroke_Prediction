@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stroke Prediction Model</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; }
+        .container { max-width: 500px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin: auto; }
+        h2 { text-align: center; color: #333; }
+        label { font-weight: bold; margin-top: 10px; display: block; }
+        input, select, button { width: 100%; padding: 10px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { background-color: #28a745; color: white; border: none; cursor: pointer; font-size: 16px; margin-top: 15px; }
+        button:hover { background-color: #218838; }
+        #result { margin-top: 20px; font-weight: bold; text-align: center; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Stroke Risk Predictor</h2>
+    <form id="predictionForm">
+        <label>Gender:</label>
+        <select id="gender"><option value="Male">Male</option><option value="Female">Female</option></select>
+
+        <label>Age:</label>
+        <input type="number" id="age" required>
+
+        <label>Hypertension:</label>
+        <select id="hypertension"><option value="0">No</option><option value="1">Yes</option></select>
+
+        <label>Heart Disease:</label>
+        <select id="heart_disease"><option value="0">No</option><option value="1">Yes</option></select>
+
+        <label>Ever Married:</label>
+        <select id="ever_married"><option value="No">No</option><option value="Yes">Yes</option></select>
+
+        <label>Work Type:</label>
+        <select id="work_type">
+            <option value="Private">Private</option>
+            <option value="Self-employed">Self-employed</option>
+            <option value="Govt_job">Government Job</option>
+            <option value="children">Children</option>
+            <option value="Never_worked">Never Worked</option>
+        </select>
+
+        <label>Residence Type:</label>
+        <select id="Residence_type"><option value="Urban">Urban</option><option value="Rural">Rural</option></select>
+
+        <label>Average Glucose Level:</label>
+        <input type="number" step="0.01" id="avg_glucose_level" required>
+
+        <label>BMI:</label>
+        <input type="number" step="0.1" id="bmi" required>
+
+        <label>Smoking Status:</label>
+        <select id="smoking_status">
+            <option value="never smoked">Never Smoked</option>
+            <option value="formerly smoked">Formerly Smoked</option>
+            <option value="smokes">Smokes</option>
+            <option value="Unknown">Unknown</option>
+        </select>
+
+        <button type="submit">Predict Risk</button>
+    </form>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Gather data from the form
+        const data = {
+            gender: document.getElementById('gender').value,
+            age: parseFloat(document.getElementById('age').value),
+            hypertension: parseInt(document.getElementById('hypertension').value),
+            heart_disease: parseInt(document.getElementById('heart_disease').value),
+            ever_married: document.getElementById('ever_married').value,
+            work_type: document.getElementById('work_type').value,
+            Residence_type: document.getElementById('Residence_type').value,
+            avg_glucose_level: parseFloat(document.getElementById('avg_glucose_level').value),
+            bmi: parseFloat(document.getElementById('bmi').value),
+            smoking_status: document.getElementById('smoking_status').value
+        };
+
+        // Send POST request to the Flask backend
+        const response = await fetch('/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const resultText = document.getElementById('result');
+        
+        if (response.ok) {
+            const result = await response.json();
+            resultText.style.color = result.stroke_prediction === 1 ? 'red' : 'green';
+            resultText.innerHTML = `Result: ${result.risk_level} <br> Probability: ${(result.stroke_probability * 100).toFixed(2)}%`;
+        } else {
+            resultText.style.color = 'red';
+            resultText.innerHTML = "Error making prediction. Check backend logs.";
+        }
+    });
+</script>
+
+</body>
+</html>
